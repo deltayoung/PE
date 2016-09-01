@@ -25,7 +25,7 @@ int main()
 {
 	int answer;
 	// TO DO
-
+	// test
 	std::cout << "The sum of the 3-digit numbers found in the top left corner of each of 50 solution grids is " << answer << std::endl;
 
 	return 0;
