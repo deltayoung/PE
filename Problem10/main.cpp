@@ -7,8 +7,7 @@ Date : 29 Sep 2016
 Duration: 5 min (1.5 hours for the optimisation)
 Comment: Runtime of this program is 5 minutes for ~2 million numbers to check using brute-force method. Use parallel computing for speedup - the tasks are highly parallel.
 Forum recommended to avoid checking even numbers and multiples of smaller numbers; reducing the search space tremendously but didn't improve the execution time (5 minutes).
-Another recommendation of maintaining prime number database (recursively) and to only check divisibility by prime numbers up to the square root of the number actually improve execution time to less than 1 second!
-*/
+Another recommendation of maintaining prime number database (recursively) and to only check divisibility by prime numbers up to the square root of the number actually improve execution time to less than 1 second! Time complexity O(1) because as the checklimit approaches infinity, the number of (most time consuming) division/modulus operation is reduced exponentially proportional to the culled search space. 
 
 #include <iostream>
 //#include <math.h>
