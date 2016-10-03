@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
-MinimumVisualStudioVersion = 10.0.40219.1
+# Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Problem1", "Problem1\Problem1.vcxproj", "{23934197-05EF-4BA6-BB21-9BACF0EB38A0}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Problem2", "Problem2\Problem2.vcxproj", "{4D685810-808B-428C-A702-46A127F145BA}"
@@ -31,7 +29,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Problem12", "Problem12\Prob
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Problem13", "Problem13\Problem13.vcxproj", "{6E312DE2-82AE-4C98-8C6A-D4357513A26E}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Project14", "Project14\Project14.vcxproj", "{F4503E68-1AA7-4D1A-BC2C-96130700BED7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Problem14", "Project14\Project14.vcxproj", "{F4503E68-1AA7-4D1A-BC2C-96130700BED7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -127,8 +125,8 @@ Global
 		{6E312DE2-82AE-4C98-8C6A-D4357513A26E}.Release|Win32.Build.0 = Release|Win32
 		{6E312DE2-82AE-4C98-8C6A-D4357513A26E}.Release|x64.ActiveCfg = Release|x64
 		{6E312DE2-82AE-4C98-8C6A-D4357513A26E}.Release|x64.Build.0 = Release|x64
-		{F4503E68-1AA7-4D1A-BC2C-96130700BED7}.Debug|Win32.ActiveCfg = Debug|Win32
-		{F4503E68-1AA7-4D1A-BC2C-96130700BED7}.Debug|Win32.Build.0 = Debug|Win32
+		{F4503E68-1AA7-4D1A-BC2C-96130700BED7}.Debug|Win32.ActiveCfg = Debug|x64
+		{F4503E68-1AA7-4D1A-BC2C-96130700BED7}.Debug|Win32.Build.0 = Debug|x64
 		{F4503E68-1AA7-4D1A-BC2C-96130700BED7}.Debug|x64.ActiveCfg = Debug|x64
 		{F4503E68-1AA7-4D1A-BC2C-96130700BED7}.Debug|x64.Build.0 = Debug|x64
 		{F4503E68-1AA7-4D1A-BC2C-96130700BED7}.Release|Win32.ActiveCfg = Release|Win32
