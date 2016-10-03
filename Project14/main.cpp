@@ -19,6 +19,11 @@ Duration:
 #include <iostream>
 using namespace std;
 
+void calculateCollatzSequenceLength(int num)
+{
+
+}
+
 int main()
 {
 	// Observation: Each number has a fixed Collatz sequence length, hence it can be recursively calculated
