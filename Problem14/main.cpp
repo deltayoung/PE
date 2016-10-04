@@ -13,39 +13,90 @@ Which starting number, under one million, produces the longest chain?
 NOTE: Once the chain starts the terms are allowed to go above one million.
 
 Date : 3 Oct 2016
-Duration: 
+Duration: 1.5 hrs
+Note: The main trap of this problem is that the Collatz sequence numbers can exceed the integer range, so it's necessary to cater the tested numbers to long long range
 */
 
 #include <iostream>
 using namespace std;
 
-void calculateCollatzSequenceLength(int num)
-{
+const int numLimit = 999999;
+int skipList[numLimit];
 
+long long calculateCollatzSequenceLength(long long num)
+{
+	if (num > 1)
+	{
+		if (num <= numLimit)
+			skipList[num] = 1;	//skip
+		if (num % 2 == 0)
+			return 1 + calculateCollatzSequenceLength(num / 2);
+		else // num % 2 == 1
+			return 1 + calculateCollatzSequenceLength(3 * num + 1);
+	}
+	else if (num == 1)
+		return 1;
+	else
+		return 0;
+	
 }
 
 int main()
 {
 	// Observation: Each number has a fixed Collatz sequence length, hence it can be recursively calculated
-	// Strategy: Once a number has been counted for its Collatz sequence length, record it in a lookup table for future reference so it doesn't need to be recalculated
-	const int numLimit = 999999;
-	int startNum = numLimit, curNum = startNum, longestChainStartNum, chainLength=1, maxChainLength=chainLength;
-	
-	calculateCollatzSequenceLength(startNum);
-	while (curNum != 1)
-	{
-		if (curNum % 2 == 0)	// even number
-		{
-			curNum /= 2;
-		}
-		else	// odd number
-		{
-			curNum = 3 * curNum + 1;
-		}
-		chainLength++;
-	}
-	if (chainLength > maxChainLength)
+	// Strategy: Once a number has been visited in calculating one Collatz sequence length, record it in a lookup table for future reference so it can be skipped because it definitely has shorter Collatz sequence length
 
-	cout << "The starting number, under one million, which produces the longest chain is " << startNum << endl;
+	int i, curNum, longestChainStartNum=-1, chainLength, maxChainLength=0;
+	skipList[1] = 1;
+	if (numLimit >= 1)
+	{
+		maxChainLength = 1;
+		longestChainStartNum = 1;
+	}
+	
+	for (i = 2; i <= numLimit; i *= 2)	// all numbers from the power of 2 are precalculated
+	{
+		skipList[i] = 1;
+		maxChainLength++;
+	}
+	if (numLimit > 1)
+		longestChainStartNum = i / 2;
+	cout << "Initial longestChainStartNum=" << longestChainStartNum << " with chain length of " << maxChainLength << endl;
+
+	/*cout << endl;
+	for (int j = 1; j <= numLimit; j++)
+	{
+		if (skipList[j] == 1)
+			cout << "X";
+		else
+			cout << "=";
+	}
+	cout << endl;*/
+
+	for (i=numLimit; i>2; i--)
+	{
+		if (skipList[i] != 1)
+		{
+			chainLength = calculateCollatzSequenceLength(i);
+
+			if (chainLength > maxChainLength)
+			{
+				maxChainLength = chainLength;
+				longestChainStartNum = i;
+			}
+		}
+	}
+
+	/*cout << endl;
+	for (int j = 1; j <= numLimit; j++)
+	{
+		if (skipList[j] == 1)
+			cout << "X";
+		else
+			cout << "=";
+	}
+	cout << endl;*/
+
+	cout << "The starting number, under one million, which produces the longest chain is " << longestChainStartNum << " with chain length of " << maxChainLength << endl;
 	return 0;
 }
