@@ -5,7 +5,7 @@ Starting in the top left corner of a 2×2 grid, and only being able to move to t
 How many such routes are there through a 20×20 grid?
 
 Date : 5 Oct 2016
-Duration:
+Duration: 1.5 hours
 */
 
 #include <iostream>
@@ -53,22 +53,36 @@ int main()
 	// The integer and long long number containers will probably be capacity-wise insufficient to perform the large nominator multiplication; 
 	// hence the need to cancel as many as possible with the denominators first. In this case, it's (40*39*38*...*21)/20! = (
 	const int gridWidth = 20, gridHeight = 20;
-	long long numRoutes=1;
+	unsigned long long numRoutes=1;
 	vector<int> numerators, denominators, numeratorPrimeFactors, denominatorPrimeFactors;
-	for (int i = gridWidth + gridHeight; i > gridHeight; i++)
+	for (int i = gridWidth + gridHeight; i > gridHeight+1; i--)
 	{
 		numerators.push_back(i);
 		denominators.push_back(i - gridWidth);
 	}
+	numerators.push_back(gridHeight + 1);
+
+	cout << "Numerators = {";
+	for (int i = 0; i < numerators.size()-1; i++)
+	{
+		cout << numerators[i] << ", ";
+	}
+	cout << numerators[numerators.size() - 1] << "}" << endl;
+	cout << "Denominators = {";
+	for (int i = 0; i < denominators.size() - 1; i++)
+	{
+		cout << denominators[i] << ", ";
+	}
+	cout << denominators[denominators.size() - 1] << "}" << endl;
 
 	// decompose the numerators and denominators into their prime factors for canceling each other
 	for (int i = 0; i < numerators.size(); i++)	// numerators.size() = denominators.size()
 	{
 		vector<int> tempNum = getPrimeFactors(numerators[i]);
-		tempNum.insert(tempNum.begin(), tempNum.end(), numeratorPrimeFactors.end());
+		numeratorPrimeFactors.insert(numeratorPrimeFactors.end(), tempNum.begin(), tempNum.end());
 
 		vector<int> tempDen = getPrimeFactors(denominators[i]);
-		tempDen.insert(tempDen.begin(), tempDen.end(), denominatorPrimeFactors.end());
+		denominatorPrimeFactors.insert(denominatorPrimeFactors.end(), tempDen.begin(), tempDen.end());
 	}
 
 	// cancel out common prime factors between the numerators and denominators
