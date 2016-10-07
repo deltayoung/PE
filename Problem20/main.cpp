@@ -6,7 +6,8 @@ For example, 10! = 10 × 9 × ... × 3 × 2 × 1 = 3628800, and the sum of the d
 Find the sum of the digits in the number 100!
 
 Date : 7 Oct 2016
-Duration : (in progress) 1.5 hrs
+Duration : 2 hrs
+Note: It took extra time to debug; the culprit is forgetting to reset carry to 0 before at the end of the loop.
 */
 
 #include <iostream>
@@ -49,16 +50,24 @@ int main()
 			}
 			if (carry > 0)
 					factorial.push_back(carry);
-
+			
+			carry = 0;
 			curNum /= 10;
 			offset++;	// tracking the current digit of curNum being processed 
 		}
 	}
 	
+	cout << num << "! = ";
+	for (int i = factorial.size()-1; i >= 0; i--)
+	{
+		cout << factorial[i];
+	}
+	cout << endl;
+
 	for (int i = 0; i < factorial.size(); i++)
 		sum += factorial[i];
 
-	cout << "The sum of the digits in the number 100! is " << sum << endl;
+	cout << "The sum of the digits in the number " << num << "! is " << sum << endl;
 	
 	return 0;
 }
