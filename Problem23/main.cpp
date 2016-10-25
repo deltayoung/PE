@@ -10,42 +10,132 @@ However, this upper limit cannot be reduced any further by analysis even though 
 
 Find the sum of all the positive integers which cannot be written as the sum of two abundant numbers.
 
-Date : 19 Oct 2016
-Duration : 
+Date : 19-25 Oct 2016
+Duration : 2 hours
+Note: A tad long runtime (~20 seconds) without optimisation. After optimisation by reducing the search space by avoiding repeated summations of all abundant numbers for each input, the running time is less than 1 second (instantaneous).
 */
 
 #include <iostream>
+#include <vector>
 using namespace std;
+
+const int limit = 28123, smallestAbundantNumber = 12;
+int smallestSummableNumber = smallestAbundantNumber + smallestAbundantNumber;
+vector<int> abundantNumberList;
+
+/*void findDivisors(int num, vector<int> &properDivisors)
+{
+	properDivisors.clear();
+
+	if (num < 1)
+		return;
+	else
+		properDivisors.push_back(1);
+
+	for (int i = 2; i < num; i++)
+	{
+		if (num % i == 0)
+			properDivisors.push_back(i);
+	}
+}*/
+
+bool isAbundantNumber(int num)
+{
+	unsigned long long sum = 1;
+
+	/*vector<int> properDivisors;
+	findDivisors(num, properDivisors);
+
+	for (int i = 0; i < properDivisors.size(); i++)
+	{
+		sum += properDivisors[i];
+	}*/
+
+	if (num < 1)
+		return false;
+	int mid = (int)floor(sqrt(num)), otherFactor;
+	for (int i = 2; i <= mid; i++)
+	{
+		if (num%i == 0)
+		{
+			sum += i;
+			otherFactor = num / i;
+			if (otherFactor != i)
+				sum += otherFactor;
+		}
+	}
+
+	if (sum > num)
+		return true;
+	else
+		return false;
+}
+
+/*bool isSummable(int num)
+{
+	for (int i = 0; i < abundantNumberList.size(); i++)
+	{
+		for (int j = 0; j < abundantNumberList.size(); j++)
+		{
+			if (abundantNumberList[i] + abundantNumberList[j] == num)
+				return true;
+		}
+	}
+
+	return false;
+}*/
 
 int main()
 {
-	const int limit = 28123, smallestSummableNumber = 24;
-	int summableList[limit+1] = { 0 };	// 0 - not summable, 1 - summable
+	//vector<int> summableList;
+	int summableList[2 * limit + 1] = { 0 };	// 0 - non-summable, 1 - summable
 	unsigned long long sum = 0;
+
+	abundantNumberList.push_back(smallestAbundantNumber);
+
 	for (int i = 1; i < smallestSummableNumber; i++)
 		sum += i;
+	//summableList.push_back(smallestSummableNumber);
 	summableList[smallestSummableNumber] = 1;
+
+	for (int i = smallestAbundantNumber + 1; i <= smallestSummableNumber; i++)
+	{
+		if (isAbundantNumber(i))
+			abundantNumberList.push_back(i);
+	}
 
 	// check for summability
 	for (int i = smallestSummableNumber+1; i <= limit; i++)
 	{
-		if (isSummable(i))
+		if (isAbundantNumber(i))
+			abundantNumberList.push_back(i);
+		/*if (isSummable(i))
 		{
-			summableList[i] = 1;
-			for (int j = smallestSummableNumber; j < i; j++)
-			{
-				if (summableList[j] == 1)
-
-			}
+			summableList.push_back(i);
 		}
+		else
+			sum += i;*/
+		/*if (!isSummable(i))
+			sum += i;*/
+	}
+	for (int i = 0; i < abundantNumberList.size(); i++)
+	{
+		for (int j = i; j < abundantNumberList.size(); j++)
+			summableList[abundantNumberList[i] + abundantNumberList[j]] = 1;
 	}
 
-	// sum up the non-summable numbers
 	for (int i = smallestSummableNumber+1; i <= limit; i++)
-	{
 		if (summableList[i] == 0)
 			sum += i;
+	/*cout << "List of abundant numbers: ";
+	for (int i = 0; i < 1000; i++)
+	//for (int i = 0; i < abundantNumberList.size(); i++)
+	{
+		cout << abundantNumberList[i] << " ";
 	}
+	cout << endl;*/
+
+	//cout << "There are " << limit - summableList.size() << " non-summable numbers" << endl;
 
 	cout << "The sum of all the positive integers which cannot be written as the sum of two abundant numbers is " << sum << endl;
 	return 0;
