@@ -15,14 +15,15 @@ but all with unique solutions (the first puzzle in the file is the example above
 By solving all fifty puzzles find the sum of the 3-digit numbers found in the top left corner of each solution grid; 
 for example, 483 is the 3-digit number found in the top left corner of the solution grid above.
 
-Date : 27 Oct 2016
-Duration: 3.5 hrs
+Date : 27,28 Oct 2016
+Duration: 5 hrs
 */
 
 #include <iostream>
 #include <string>
 #include <fstream>
 #include <vector>
+#include <algorithm>
 using namespace std;
 
 const int gridSize = 9, regionDim = sqrt(gridSize);
@@ -76,7 +77,8 @@ bool readInput(string inputFile)
 
 void solvePuzzle(const int index)
 {
-	vector<vector<int>> inRow, inColumn, inRegion; // to mark inRow[num-1][x]/inColumn[num-1][x]/inRegion[num-1][x] if a number exists in particular row/column/region x: 0=non-existent, 1=exist 
+	vector<vector<int>> inRow, inColumn, inRegion;	// to mark inRow[num-1][x]/inColumn[num-1][x]/inRegion[num-1][x] if a number exists in particular row/column/region x: 0=non-existent, 1=exist 
+													// for inRegion, the regions are numbered 1 till gridSize horizontally from left to right, moving downwards
 	vector<pair<int, int>> priorityQ;	// the order of processing each number; a number has higher priority if it's been completed in more regions (but not fully completed at all regions yet); pair<num, counter>
 	for (int i = 1; i <= gridSize; i++)
 		priorityQ.push_back(make_pair(i, 0));
@@ -108,15 +110,42 @@ void solvePuzzle(const int index)
 		for (int j = 0; j < gridSize; j++)
 			if (puzzles[index][i][j] != 0)
 				priorityQ[puzzles[index][i][j] - 1].second++;
+	for (int i = priorityQ.size()-1; i >= 0; i--)
+	{
+		if (priorityQ[i].second == gridSize)	// fully solved for the number i
+			priorityQ.pop_back();
+	}
 	// sort priorityQ based on counter
-	// ...... to do
+	struct {
+		bool operator()(pair<int, int> a, pair<int, int> b)
+		{
+			return a.second > b.second;
+		}
+	} myCompare;
+	sort(priorityQ.begin(), priorityQ.end(), myCompare);
 
 	while (puzzles[index][0][0] == 0 || puzzles[index][0][1] == 0 || puzzles[index][0][2] == 0)	// only need to solve the first 3 top left numbers for each puzzle
 	{
-		for (int i = 1; i <= gridSize; i++)	// check for answers systematically using some rules for filling in numbers 1 to 9
+		for (int i = 0; i < priorityQ.size(); i++)	// check for answers systematically using some rules for filling in numbers 1 to 9 according to the priority queue
 		{
+			while (priorityQ[i].second < gridSize)
+			{
+				for (int j = 0; j < inRegion[priorityQ[i].first - 1].size(); j++)	// check each region
+				{
+					if (inRegion[priorityQ[i].first - 1][j] == 0)	// to attempt to solve for number i by checking its inRegion horizontally and vertically - if all its corresponding horizontal(left&right)/vertical(up&down) neighboring regions have been solved but one region, then it can be deduced  
+					{
+						if (inRegion[priorityQ[i].first - 1][j%regionDim == 0 ? j - 1 + regionDim : j - 1] == 1 && inRegion[priorityQ[i].first - 1][(j + 1) % regionDim == 0 ? j + 1 - regionDim : j + 1] == 1 && inRegion[priorityQ[i].first - 1][j < regionDim ? gridSize + j - regionDim : j - regionDim] == 1 && inRegion[priorityQ[i].first - 1][j + regionDim >= gridSize ? j%regionDim : j + regionDim] == 1)
+						{
+							// solvable
 
-			// Check 1: check each row, column, and region if number j is only missing in 1 row/column/region
+						}
+						
+					}
+				}
+				// when new input is found, break from the while loop
+				if ()
+					break;
+			}
 
 		}
 	}
