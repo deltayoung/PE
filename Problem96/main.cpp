@@ -15,7 +15,7 @@ but all with unique solutions (the first puzzle in the file is the example above
 By solving all fifty puzzles find the sum of the 3-digit numbers found in the top left corner of each solution grid; 
 for example, 483 is the 3-digit number found in the top left corner of the solution grid above.
 
-Date : 27,28 Oct 2016
+Date : 27,28, 31 Oct 2016
 Duration: >10 hrs (deduction method - incomplete, too many rules to consider even to solve the easiest puzzle!),  hrs (backtracking method - guessing, backtrack if wrong, proceed if no conflict)
 */
 
@@ -302,7 +302,7 @@ void solvePuzzleByBacktracking(const int index)
 	int theNum = assignPotentialNumber();
 	while ()
 	{
-		if (theNum < 1)	// invalid, so backtrack
+		if (solve() < 0)	// invalid, so backtrack
 		{
 
 		}
