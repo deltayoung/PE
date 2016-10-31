@@ -297,23 +297,77 @@ void solvePuzzleByDeduction(const int index)
 	cout << "Puzzle Grid " << index + 1 << " has been solved." << endl;
 }
 
+class Entry {
+private:
+	int row;
+	int col;
+	int val;
+public:
+	int getRow() { return row; }
+	int getCol() { return col; }
+	int getVal() { return val; }
+	void setRow(const int r) { row = r; }
+	void setCol(const int c) { col = c; }
+	void setVal(const int v) { val = v; }
+
+	Entry()
+	{
+		row = col = val = 0;
+	}
+	
+	Entry(int r, int c, int v)
+	{
+		row = r;
+		col = c;
+		val = v;
+	}
+
+	void operator=(const Entry &e)
+	{
+		row = e.row;
+		col = e.col;
+		val = e.val;
+	}
+
+	bool operator==(const Entry &e)
+	{
+		return (row == e.row && col == e.col && val == e.val);
+	}
+};
+
+bool findNext(Entry &current, Entry &next)
+{
+	
+
+	// to do
+
+	return true;
+}
+
 void solvePuzzleByBacktracking(const int index)
 {
-	int theNum = assignPotentialNumber();
-	while ()
+	vector<Entry> track;
+	Entry current, next;
+	findNext(Entry(), current);
+	track.push_back(current);
+	while (track.size() < gridSize)
 	{
-		if (solve() < 0)	// invalid, so backtrack
+		if (findNext(current, next))
 		{
-
+			track.push_back(next);
+			current = next;
 		}
 		else
 		{
-			vector<>.push_back(theNum);
-			theNum = assignPotentialNumber();
+			current = track.at(track.size() - 1);
+			track.pop_back();
 		}
 	}
 
-
+	for (int i = 0; i < track.size(); i++)
+	{
+		puzzles[index][track[i].getRow()][track[i].getCol()] = track[i].getVal();
+	}
 }
 
 int main()
