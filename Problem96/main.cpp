@@ -15,8 +15,9 @@ but all with unique solutions (the first puzzle in the file is the example above
 By solving all fifty puzzles find the sum of the 3-digit numbers found in the top left corner of each solution grid; 
 for example, 483 is the 3-digit number found in the top left corner of the solution grid above.
 
-Date : 27,28, 31 Oct 2016
-Duration: >10 hrs (deduction method - incomplete, too many rules to consider even to solve the easiest puzzle!),  hrs (backtracking method - guessing, backtrack if wrong, proceed if no conflict)
+Date : 27,28,31 Oct, 1 Nov 2016
+Duration:	>10 hrs (deduction method - incomplete, too many rules to consider even to solve the easiest puzzle!), 
+			6 hrs (backtracking method - guessing, backtrack if wrong, proceed if no conflict - challenges were on findNext and findOnePotentialValue to enable correct backtracking)
 */
 
 #include <iostream>
@@ -24,10 +25,12 @@ Duration: >10 hrs (deduction method - incomplete, too many rules to consider eve
 #include <fstream>
 #include <vector>
 #include <algorithm>
+#include "Entry.h"
 using namespace std;
 
 const int gridSize = 9, regionDim = sqrt(gridSize);
 vector<vector<vector<int>>> puzzles;
+vector<vector<int>> potentialValues;
 
 bool readInput(string inputFile)
 {
@@ -297,90 +300,212 @@ void solvePuzzleByDeduction(const int index)
 	cout << "Puzzle Grid " << index + 1 << " has been solved." << endl;
 }
 
-class Entry {
-private:
-	int row;
-	int col;
-	int val;
-public:
-	int getRow() { return row; }
-	int getCol() { return col; }
-	int getVal() { return val; }
-	void setRow(const int r) { row = r; }
-	void setCol(const int c) { col = c; }
-	void setVal(const int v) { val = v; }
-
-	Entry()
-	{
-		row = col = val = 0;
-	}
-	
-	Entry(int r, int c, int v)
-	{
-		row = r;
-		col = c;
-		val = v;
-	}
-
-	void operator=(const Entry &e)
-	{
-		row = e.row;
-		col = e.col;
-		val = e.val;
-	}
-
-	bool operator==(const Entry &e)
-	{
-		return (row == e.row && col == e.col && val == e.val);
-	}
-};
-
-bool findNext(Entry &current, Entry &next)
+int findOnePotentialValue(const int index, const int row, const int col)
 {
-	
+	// search across row, col, and region if theVal already exists
+	int checker[gridSize + 1] = {0};
+	int theVal = potentialValues[row][col];
+	//cout << "potentialValues[" << row << "][" << col << "]=" << theVal << endl;
+	//cout << "checker[theVal]=" << checker[theVal] << endl;
+	if (theVal > 9) // invalid
+		return -1;
+	for (int i = 0; i < gridSize; i++)
+	{
+		if (puzzles[index][row][i] >= theVal) // check across the row
+			checker[puzzles[index][row][i]] = 1;
+		if (puzzles[index][i][col] >= theVal) // check across the column
+			checker[puzzles[index][i][col]] = 1;
+	}
+	int startI = (row / regionDim)*regionDim, startJ = (col / regionDim)*regionDim;
+	for (int i = startI; i<startI + regionDim; i++)
+	{
+		for (int j = startJ; j < startJ + regionDim; j++)
+		{
+			if (puzzles[index][i][j] >= theVal) // check across the region
+				checker[puzzles[index][i][j]] = 1;
+		}
+	}
+
+	//cout << "theVal=" << theVal << endl;
+	//cout << "checker[theVal]=" << checker[theVal] << endl;
+	for (int i = theVal; i <= gridSize; i++)
+	{
+		if (checker[i] == 0)	// potential value
+		{
+			theVal = i;
+			break;
+		}
+		else if (i == gridSize) // no more potential value
+		{
+			theVal = 10;
+		}
+	}
+
+	//cout << "final theVal=" << theVal << endl;
+
+	if (theVal > 9) // invalid
+		return -1;
+	else
+	{
+		potentialValues[row][col] = theVal+1;
+		return theVal;
+	}
+}
+
+bool findNext(const int index, Entry &current, Entry &next)
+{
+	if (&current == NULL || &next == NULL)
+		return false;
 
 	// to do
+	if (current.getVal() == -1)	// find the first entry to solve
+	{
+		for (int i = 0; i < gridSize; i++)
+		{
+			for (int j = 0; j < gridSize; j++)
+			{
+				if (puzzles[index][i][j] == 0)	// unsolved
+				{
+					next.setRow(i);
+					next.setCol(j);
+					next.setVal(findOnePotentialValue(index, i, j));
+					if (next.getVal() == -1) // conflict
+						return false;
+					else
+						return true;
+				}
+			}
+		}
+	}
+	else // find the next entry based on current entry
+	{
+		for (int i = current.getRow(); i < gridSize; i++)
+		{
+			for (int j = 0; j < gridSize; j++)
+			{
+				if (puzzles[index][i][j] == 0) // unsolved
+				{
+					next.setRow(i);
+					next.setCol(j);
+					next.setVal(findOnePotentialValue(index, i, j));
+					//cout << "findNext(" << index << ", current(" << current.getRow() << "," << current.getCol() << "," << current.getVal() << "), next(" << next.getRow() << "," << next.getCol() << "," << next.getVal() << "))" << endl;
+					if (next.getVal() == -1)
+						return false;
+					else
+						return true;
+				}
+			}
+		}
+	}
 
-	return true;
+	return false;
+}
+
+void initialisePotentialValues()
+{
+	if (potentialValues.size() > 0)
+	{
+		for (int i = 0; i < potentialValues.size(); i++)
+			potentialValues[i].clear();
+		potentialValues.clear();
+	}
+
+	vector<int> temp;
+	for (int i = 0; i < gridSize; i++)
+	{
+		temp.clear();
+		for (int j = 0; j < gridSize; j++)
+		{
+			temp.push_back(1);
+		}
+		potentialValues.push_back(temp);
+	}
+
+	/*cout << "potentialValues:" << endl;
+	for (int i = 0; i < potentialValues.size(); i++)
+	{
+		for (int j = 0; j < potentialValues[i].size(); j++)
+			cout << potentialValues[i][j];
+		cout << endl;
+	}
+	cout << endl;*/
 }
 
 void solvePuzzleByBacktracking(const int index)
 {
+	cout << " by backtracking..." << endl;
+
+	initialisePotentialValues();
+	int limit = 0;
+	for (int i=0; i<gridSize; i++)
+		for (int j = 0; j < gridSize; j++)
+			if (puzzles[index][i][j] == 0)
+				limit++;
+
 	vector<Entry> track;
 	Entry current, next;
-	findNext(Entry(), current);
+	findNext(index, Entry(), current);
+	puzzles[index][current.getRow()][current.getCol()] = current.getVal();
 	track.push_back(current);
-	while (track.size() < gridSize)
+	while (track.size() < limit)
 	{
-		if (findNext(current, next))
+		//cout << "Debug A" << endl;
+		if (findNext(index, current, next))
 		{
+			puzzles[index][next.getRow()][next.getCol()] = next.getVal();
 			track.push_back(next);
 			current = next;
+			/*cout << "Debug B" << endl;
+			for (int i = 0; i < track.size(); i++)
+				cout << "track[" << i << "].row=" << track[i].getRow() << " .col=" << track[i].getCol() << " .val=" << track[i].getVal() << endl;*/
 		}
 		else
 		{
-			current = track.at(track.size() - 1);
-			track.pop_back();
+			while (true)
+			{
+				current = track.at(track.size() - 1);
+				track.pop_back();
+				puzzles[index][current.getRow()][current.getCol()] = 0;	// restore to unsolved
+				int nextVal = findOnePotentialValue(index, current.getRow(), current.getCol());
+				//cout << "Debug C1: current.row=" << current.getRow() << ", .col=" << current.getCol() << ", .val=" << current.getVal() <<", nextVal=" << nextVal << endl;
+				if (nextVal > 0)
+				{
+					current.setVal(nextVal);
+					puzzles[index][current.getRow()][current.getCol()] = current.getVal();
+					track.push_back(current);
+					/*cout << "Debug C2" << endl;
+					for (int i = 0; i < track.size(); i++)
+						cout << "track[" << i << "].row=" << track[i].getRow() << " .col=" << track[i].getCol() << " .val=" << track[i].getVal() << endl;*/
+					break;
+				}
+				else
+				{
+					potentialValues[current.getRow()][current.getCol()] = 1;	// reset potential values
+				}
+			}
+			//cout << "Debug D" << endl;
 		}
 	}
 
 	for (int i = 0; i < track.size(); i++)
 	{
 		puzzles[index][track[i].getRow()][track[i].getCol()] = track[i].getVal();
+		//cout << "track[" << i << "].row=" << track[i].getRow() << " .col=" << track[i].getCol() << " .val=" << track[i].getVal() << endl;
 	}
 }
 
 int main()
 {
 	int answer = 0;
-	
-	if (readInput("../../p096_sudoku.txt") == false)
+
+	if (readInput("D:/SourceCodes/ProjectEuler/Problem96/p096_sudoku.txt") == false)
+	//if (readInput("../../p096_sudoku.txt") == false)
 		return -1;
 
 	// sum answers from each puzzle
 	for (int i = 0; i < puzzles.size(); i++)
 	{
-		cout << endl << "Solving puzzle Grid " << i + 1 << "..." << endl;
+		cout << endl << "Solving puzzle Grid " << i + 1;
 		//solvePuzzleByDeduction(i);
 		solvePuzzleByBacktracking(i);
 		answer += puzzles[i][0][0] * 100 + puzzles[i][0][1] * 10 + puzzles[i][0][2];
