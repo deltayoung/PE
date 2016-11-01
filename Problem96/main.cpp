@@ -18,6 +18,7 @@ for example, 483 is the 3-digit number found in the top left corner of the solut
 Date : 27,28,31 Oct, 1 Nov 2016
 Duration:	>10 hrs (deduction method - incomplete, too many rules to consider even to solve the easiest puzzle!), 
 			6 hrs (backtracking method - guessing, backtrack if wrong, proceed if no conflict - challenges were on findNext and findOnePotentialValue to enable correct backtracking)
+Note: Answer unchecked at ProjectEuler.net as the website is down. My answer: 24702.
 */
 
 #include <iostream>
