@@ -50,7 +50,7 @@ So these three most popular squares can be listed with the six - digit modal str
 If, instead of using two 6 - sided dice, two 4 - sided dice are used, find the six - digit modal string.
 
 Date : 2 Nov 2016
-Duration:
+Duration: 2-6 hrs (implementation only to including design)
 Strategy consideration: Markov Chain for 120 states (=40 squares * 3 consecutive rolls) is memory-less - can't account for probability distribution of orderly picked CC/CH cards from the shuffled decks. 
 Alternatively, a full simulation of large number of dice rolls will produce a more accurate empirical probability distribution model, taking into consideration the order of CC/CH stacks.
 Assumption: there is only 1 player in the simulation, so the CC/CH stack order will be preserved with respect to the movement among the squares.
