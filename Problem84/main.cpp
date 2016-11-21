@@ -180,18 +180,10 @@ int main()
 		{
 			curPos = 10;	// go to jail upon 3 consecutive double dice rolls
 			statistics[curPos].second++;
+			doubleCount = 0;
 		}
 		else if (curPos == 30)
 			curPos = 10;	// go to jail
-		else if (curPos == 2 || curPos == 17 || curPos == 33)	// landed on CC1, CC2, or CC3
-		{
-			if (CCstack[nextCCptr] == 0)	// go to 00 (GO) movement card is drawn from CC stack
-				curPos = 0;
-			else if (CCstack[nextCCptr] == 10)	// go to 10 (JAIL) movement card is drawn from CC stack
-				curPos = 10;
-
-			nextCCptr = (nextCCptr+1==stackSize) ? 0 : nextCCptr+1;	// put drawn CC card to the bottom of the stack
-		}
 		else if (curPos == 7 || curPos == 22 || curPos == 36)	// landed on CH1, CH2, or CH3
 		{
 			if (CHstack[nextCHptr] != -1)	// movement card is drawn from CH stack
@@ -214,6 +206,17 @@ int main()
 			}
 
 			nextCHptr = (nextCHptr + 1 == stackSize) ? 0 : nextCHptr + 1;
+		}
+		
+		// this separate condition check is to accommodate the special case of going back 3 squares from CH3 to CC3
+		if (curPos == 2 || curPos == 17 || curPos == 33)	// landed on CC1, CC2, or CC3
+		{
+			if (CCstack[nextCCptr] == 0)	// go to 00 (GO) movement card is drawn from CC stack
+				curPos = 0;
+			else if (CCstack[nextCCptr] == 10)	// go to 10 (JAIL) movement card is drawn from CC stack
+				curPos = 10;
+
+			nextCCptr = (nextCCptr + 1 == stackSize) ? 0 : nextCCptr + 1;	// put drawn CC card to the bottom of the stack
 		}
 		statistics[curPos].second++;
 	}
