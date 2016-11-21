@@ -51,4 +51,189 @@ If, instead of using two 6 - sided dice, two 4 - sided dice are used, find the s
 
 Date : 2 Nov 2016
 Duration:
+Strategy consideration: Markov Chain for 120 states (=40 squares * 3 consecutive rolls) is memory-less - can't account for probability distribution of orderly picked CC/CH cards from the shuffled decks. 
+Alternatively, a full simulation of large number of dice rolls will produce a more accurate empirical probability distribution model, taking into consideration the order of CC/CH stacks.
+Assumption: there is only 1 player in the simulation, so the CC/CH stack order will be preserved with respect to the movement among the squares.
+Result: Inconsistent simulation result for 6-sided dies: 102400 / 102419 / 102425 even for 10^9 rolls. For 4-sided dies, it's more consistent, mostly 101524 (and very rarely 101516).
 */
+
+#include <iostream>
+#include <time.h>
+#include <vector>
+#include <algorithm>
+#include <iomanip>
+using namespace std;
+
+int main()
+{
+	srand(time(NULL));
+	const int numSquares = 40, numRolls = 10000000, diceSides = 4, numDies = 2, stackSize = 16;
+
+	int top1, top2, top3,	// answers
+		diceRollSum, 
+		doubleCount = 0,	// mark consecutive double rolls
+		nextCCptr = 0,	// point to the topmost card in CC stack
+		nextCHptr = 0,	// point to the topmost card in CH stack
+		curPos = 0;	// start from 00 (GO)
+	int CCstack[stackSize], CHstack[stackSize];
+	vector<pair<int,int>> statistics;
+	for (int i = 0; i < numSquares; i++)
+		statistics.push_back(make_pair(i,0));
+	for (int i = 0; i < stackSize; i++)
+	{
+		CCstack[i] = -1;  // non-movement card
+		CHstack[i] = -1;  // non-movement card
+	}
+
+	cout << "Shuffling cards..." << endl;
+
+	// shuffling CC stack
+	int curCC, numCCmov = 0;
+	while (true)
+	{
+		if (numCCmov == 2)	// there are only 2 movement cards in CC stack
+			break;
+
+		curCC = rand() % stackSize;
+		if (CCstack[curCC] == -1)
+		{
+			if (numCCmov == 0)
+				CCstack[curCC] = 0; // go to 00 (GO)
+			else if (numCCmov == 1)
+				CCstack[curCC] = 10; // go to 10 (JAIL)
+			numCCmov++;
+		}
+	}
+
+	// shuffling CH stack
+	int curCH, numCHmov = 0;
+	while (true)
+	{
+		if (numCHmov == 10)	// there are only 10 movement cards in CH stack
+			break;
+
+		curCH = rand() % stackSize;
+		if (CHstack[curCH] == -1)
+		{
+			switch (numCHmov) {
+			case 0:
+				CHstack[curCH] = 0; // go to 00 (GO)
+				break;
+			case 1:
+				CHstack[curCH] = 10; // go to 10 (JAIL)
+				break;
+			case 2:
+				CHstack[curCH] = 11; // go to 11 (C1)
+				break;
+			case 3:
+				CHstack[curCH] = 24; // go to 24 (E3)
+				break;
+			case 4:
+				CHstack[curCH] = 39; // go to 39 (H2)
+				break;
+			case 5:
+				CHstack[curCH] = 5; // go to 05 (R1)
+				break;
+			case 6:
+				CHstack[curCH] = 35; // go to 05, 15, 25, or 35 (next R)
+				break;
+			case 7:
+				CHstack[curCH] = 35; // go to 05, 15, 25, or 35 (next R)
+				break;
+			case 8:
+				CHstack[curCH] = 12; // go to 12 or 28 (next U)
+				break;
+			case 9:
+				CHstack[curCH] = -3; // go back 3 squares
+				break;
+			}
+			numCHmov++;
+		}
+	}
+
+	cout << "Dice rolling simulation..." << endl;
+
+	// simulation
+	int aDiceOutput;
+	bool isDouble;
+	for (int i = 0; i < numRolls; i++)
+	{
+		diceRollSum = 0;
+		aDiceOutput = 0;
+		int newDiceOutput = aDiceOutput = rand() % diceSides + 1;
+		isDouble = true;
+		for (int j = 0; j < numDies; j++)
+		{
+			if (aDiceOutput != newDiceOutput)
+				isDouble = false;
+			diceRollSum += newDiceOutput;
+			newDiceOutput = rand() % diceSides + 1;
+		}
+		if (isDouble)
+			doubleCount++;
+		else
+			doubleCount = 0;	// reset
+
+		curPos = (curPos + diceRollSum) % numSquares;
+
+		if (doubleCount == 3)
+		{
+			curPos = 10;	// go to jail upon 3 consecutive double dice rolls
+			statistics[curPos].second++;
+		}
+		else if (curPos == 30)
+			curPos = 10;	// go to jail
+		else if (curPos == 2 || curPos == 17 || curPos == 33)	// landed on CC1, CC2, or CC3
+		{
+			if (CCstack[nextCCptr] == 0)	// go to 00 (GO) movement card is drawn from CC stack
+				curPos = 0;
+			else if (CCstack[nextCCptr] == 10)	// go to 10 (JAIL) movement card is drawn from CC stack
+				curPos = 10;
+
+			nextCCptr = (nextCCptr+1==stackSize) ? 0 : nextCCptr+1;	// put drawn CC card to the bottom of the stack
+		}
+		else if (curPos == 7 || curPos == 22 || curPos == 36)	// landed on CH1, CH2, or CH3
+		{
+			if (CHstack[nextCHptr] != -1)	// movement card is drawn from CH stack
+			{
+				if (CHstack[nextCHptr] == -3)	// go back 3 squares
+					curPos -= 3;
+				else if (CHstack[nextCHptr] == 12)	// go to next U
+					curPos = (curPos == 22) ? 28 : 12;
+				else if (CHstack[nextCHptr] == 35)	// go to next R
+				{
+					if (curPos == 7)
+						curPos = 15;
+					else if (curPos == 22)
+						curPos = 25;
+					else
+						curPos = 5;
+				}
+				else // go to assigned square number
+					curPos = CHstack[nextCHptr];	
+			}
+
+			nextCHptr = (nextCHptr + 1 == stackSize) ? 0 : nextCHptr + 1;
+		}
+		statistics[curPos].second++;
+	}
+
+	cout << "Processing statistics..." << endl;
+
+	// processing statistics for top 3 most visited squares
+	struct {
+		bool operator()(pair<int, int> a, pair<int, int> b)
+		{
+			return a.second > b.second;
+		}
+	} myCompare;
+	sort(statistics.begin(), statistics.end(), myCompare);
+	top1 = statistics[0].first;
+	top2 = statistics[1].first;
+	top3 = statistics[2].first;
+
+	cout << "When " << numDies << " " << diceSides << "-sided dies are used, the six-digit modal string is " << setfill('0') << setw(2) << top1 << setfill('0') << setw(2) << top2 << setfill('0') << setw(2) << top3 << endl;
+	//cout << "When " << numDies << " " << diceSides << "-sided dies are used, the six-digit modal string is " << top1 << " " << top2 << " " << top3 << endl;
+
+	return 0;
+}
